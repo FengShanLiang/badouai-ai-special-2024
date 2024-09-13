@@ -1,0 +1,95 @@
+import numpy as np
+import cv2
+import matplotlib as plt
+
+
+def nearest_neighbor_interpolation(image, new_height, new_width):
+    # 获取原图像的尺寸
+    print(image.shape)
+    height, width = image.shape[:2]
+
+    # 计算缩放比例
+    row_ratio, col_ratio = height / new_height, width / new_width
+
+    # 创建新的图像矩阵
+    new_image = np.zeros((new_height, new_width, image.shape[2]), dtype=image.dtype)
+
+    # 填充新图像
+    for i in range(new_height):
+        for j in range(new_width):
+            # 找到最接近的原图像像素
+            nearest_row = int(i * row_ratio)
+            nearest_col = int(j * col_ratio)
+            new_image[i, j] = image[nearest_row, nearest_col]
+
+    return new_image
+
+
+# 示例使用
+image = cv2.imread('image.jpg')  # 读取图像
+new_image = nearest_neighbor_interpolation(image, 300, 300)
+
+plt.imshow(cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB))
+plt.show()
+
+import numpy as np
+import matplotlib as plt
+import cv2
+
+
+def bilinear_interpolation(image, new_height, new_width):
+    height, width = image.shape[:2]
+    row_ratio, col_ratio = (height - 1) / (new_height - 1), (width - 1) / (new_width - 1)
+
+    new_image = np.zeros((new_height, new_width, image.shape[2]), dtype=image.dtype)
+
+    for i in range(new_height):
+        for j in range(new_width):
+            # 找到原图像的相应位置
+            row = i * row_ratio
+            col = j * col_ratio
+
+            row_floor = np.floor(row).astype(int)
+            row_ceil = min(row_floor + 1, height - 1)
+            col_floor = np.floor(col).astype(int)
+            col_ceil = min(col_floor + 1, width - 1)
+
+            # 计算插值权重
+            delta_row = row - row_floor
+            delta_col = col - col_floor
+
+            # 线性插值
+            top = (1 - delta_col) * image[row_floor, col_floor] + delta_col * image[row_floor, col_ceil]
+            bottom = (1 - delta_col) * image[row_ceil, col_floor] + delta_col * image[row_ceil, col_ceil]
+            new_image[i, j] = (1 - delta_row) * top + delta_row * bottom
+
+    return new_image
+
+
+# 示例使用
+image = cv2.imread('image.jpg')  # 读取图像
+bilinear_image = bilinear_interpolation(image, 300, 300)
+
+plt.imshow(cv2.cvtColor(bilinear_image, cv2.COLOR_BGR2RGB))
+plt.show()
+
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+
+def histogram_equalization(image):
+    if len(image.shape) == 2:  # 灰度图像
+        equalized_image = cv2.equalizeHist(image)
+    else:  # 彩色图像
+        ycrcb = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+        ycrcb[:, :, 0] = cv2.equalizeHist(ycrcb[:, :, 0])
+        equalized_image = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
+
+    return equalized_image
+
+
+# 示例使用
+equalized_image = histogram_equalization(image)
+
+plt.imshow(cv2.cvtColor(equalized_image, cv2.COLOR_BGR2RGB))
+plt.show()
