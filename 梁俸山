@@ -1,0 +1,88 @@
+import numpy as np
+import cv2
+
+def add_gaussian_noise(image, mean=0, var=0.01):
+    """为图像添加高斯噪声
+    Args:
+        image: 输入图像，通常是归一化到[0,1]区间的灰度图像或彩色图像
+        mean: 噪声的均值
+        var: 噪声的方差
+    Returns:
+        noisy_image: 添加高斯噪声后的图像
+    """
+    row, col, ch = image.shape
+    sigma = var ** 0.5
+    gauss = np.random.normal(mean, sigma, (row, col, ch))
+    noisy_image = image + gauss
+    noisy_image = np.clip(noisy_image, 0, 1)
+    return noisy_image
+
+def add_salt_and_pepper_noise(image, salt_prob=0.01, pepper_prob=0.01):
+    """为图像添加椒盐噪声
+    Args:
+        image: 输入图像
+        salt_prob: 噪声中盐（白点）的比例
+        pepper_prob: 噪声中椒（黑点）的比例
+    Returns:
+        noisy_image: 添加椒盐噪声后的图像
+    """
+    noisy_image = np.copy(image)
+    num_salt = np.ceil(salt_prob * image.size)
+    num_pepper = np.ceil(pepper_prob * image.size)
+    
+    # 添加盐噪声
+    coords = [np.random.randint(0, i - 1, int(num_salt)) for i in image.shape]
+    noisy_image[coords[0], coords[1], :] = 1
+    
+    # 添加椒噪声
+    coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in image.shape]
+    noisy_image[coords[0], coords[1], :] = 0
+    
+    return noisy_image
+
+
+def add_salt_and_pepper_noise(image, salt_prob=0.01, pepper_prob=0.01):
+    """为图像添加椒盐噪声
+    Args:
+        image: 输入图像
+        salt_prob: 噪声中盐（白点）的比例
+        pepper_prob: 噪声中椒（黑点）的比例
+    Returns:
+        noisy_image: 添加椒盐噪声后的图像
+    """
+    noisy_image = np.copy(image)
+    num_salt = np.ceil(salt_prob * image.size)
+    num_pepper = np.ceil(pepper_prob * image.size)
+    
+    # 添加盐噪声
+    coords = [np.random.randint(0, i - 1, int(num_salt)) for i in image.shape]
+    noisy_image[coords[0], coords[1], :] = 1
+    
+    # 添加椒噪声
+    coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in image.shape]
+    noisy_image[coords[0], coords[1], :] = 0
+    
+    return noisy_image
+
+
+from sklearn.decomposition import PCA
+import numpy as np
+
+def apply_pca(data, n_components=2):
+    """对数据应用PCA降维
+    Args:
+        data: 输入数据矩阵，每行是一个样本，每列是一个特征
+        n_components: 降维后的维度数
+    Returns:
+        transformed_data: 降维后的数据
+        pca: PCA对象，用于查看主成分等信息
+    """
+    pca = PCA(n_components=n_components)
+    transformed_data = pca.fit_transform(data)
+    return transformed_data, pca
+
+# 示例：对随机数据应用PCA
+data = np.random.rand(100, 5)  # 100个样本，5个特征
+transformed_data, pca_model = apply_pca(data, n_components=2)
+print(f"降维后的数据：\n{transformed_data}")
+print(f"各主成分的方差：\n{pca_model.explained_variance_ratio_}")
